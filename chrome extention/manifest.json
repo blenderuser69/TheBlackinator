@@ -1,0 +1,18 @@
+{
+  "name": "TheBlackinator",
+  "description": "Wraps visited pages in a Tailwind background div",
+  "version": "1.0",
+  "manifest_version": 3,
+  "permissions": ["activeTab", "scripting"],
+  "action": {
+    "default_popup": "main.html",
+    "default_icon": "V1 GLOCK.png"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["index.js"],
+      "run_at": "document_end"
+    }
+    ]
+}
