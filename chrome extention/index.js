@@ -1,39 +1,53 @@
 alert('index.js loaded');
 
-//Inject Tailwind CSS CDN
+// Inject Tailwind CSS CDN
 const tailwindLink = document.createElement('script');
 tailwindLink.src = "https://cdn.tailwindcss.com";
 document.head.appendChild(tailwindLink);
 
-//create or referance an element(from html)
+// Reference body
 const body = document.body;
 
-//add atributes/properties
+// Optional: body background
 body.id = 'BG_';
 body.style.background = 'none';
 body.style.backgroundColor = 'transparent';
 body.className = 'bg-gradient-to-r from-green-400 to-blue-500';
 
-//apply background to all elements
+// Apply background color only where needed
 document.querySelectorAll('*').forEach(el => {
-  el.style.background = 'none';//or none
-  el.style.backgroundColor = 'black';//or transparent
+  if (el.tagName !== 'SPAN') {
+    el.style.background = 'none';
+    el.style.backgroundColor = 'black'; // or any other
+  }
 });
 
+// Specific element styles
 document.querySelectorAll('table').forEach(el => {
-  el.style.background = 'none';//or none
-  el.style.backgroundColor = 'prurple';//or transparent
+  el.style.background = 'none';
+  el.style.backgroundColor = 'purple';
 });
 
 document.querySelectorAll('input').forEach(el => {
-  el.style.background = 'none';//or none
-  el.style.backgroundColor = 'blue';//or transparent
+  el.style.background = 'none';
+  el.style.backgroundColor = 'cyan';
 });
 
-document.querySelectorAll('br').forEach(el => {
-  el.style.background = 'none';//or none
-  el.style.backgroundColor = 'red';//or transparent
+document.querySelectorAll('div').forEach(el => {
+  el.style.background = 'none';
+  el.style.color = 'purple';
 });
+
+document.querySelectorAll('span').forEach(el => {
+  el.style.background = 'none';
+  el.style.color = 'purple';
+});
+
+document.querySelectorAll('h1, h2, h3, h4, h5, h6').forEach(el => {
+  el.style.background = 'none';
+  el.style.color = 'blue';
+});
+document.background = 'fixed inset-0 bg-gradient-to-r from-green-400 to-blue-500 -z-10';
 
 // Add overlay gradient behind content
 const overlay = document.createElement('div');
