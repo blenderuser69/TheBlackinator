@@ -1,55 +1,82 @@
-alert('index.js loaded');
 
-// Inject Tailwind CSS CDN
-const tailwindLink = document.createElement('script');
-tailwindLink.src = "https://cdn.tailwindcss.com";
-document.head.appendChild(tailwindLink);
+// --- CONTENT SCRIPT PART ---
+if (!window.__themeInjected) {
+  window.__themeInjected = true;
 
-// Reference body
-const body = document.body;
-
-// Optional: body background
-body.id = 'BG_';
-body.style.background = 'none';
-body.style.backgroundColor = 'transparent';
-body.className = 'bg-gradient-to-r from-green-400 to-blue-500';
-
-// Apply background color only where needed
-document.querySelectorAll('*').forEach(el => {
-  if (el.tagName !== 'SPAN') {
-    el.style.background = 'none';
-    el.style.backgroundColor = 'black'; // or any other
+  // Inject Tailwind once
+  if (!document.getElementById('tailwind-cdn')) {
+    const tailwindScript = document.createElement('script');
+    tailwindScript.id = 'tailwind-cdn';
+    tailwindScript.src = 'https://cdn.tailwindcss.com';
+    document.head.appendChild(tailwindScript);
   }
-});
 
-// Specific element styles
-document.querySelectorAll('table').forEach(el => {
-  el.style.background = 'none';
-  el.style.backgroundColor = 'purple';
-});
+  // Store original page styles
+  const originalStyles = {
+    bodyClass: document.body.className,
+    bodyBg: document.body.style.background,
+    inputs: [],
+    divs: [],
+    spans: [],
+    a: [],//
+    headings: [],
+    headers: [],
+    originalColor: document.body.style.backgroundColor,
+  };
 
-document.querySelectorAll('input').forEach(el => {
-  el.style.background = 'none';
-  el.style.backgroundColor = 'cyan';
-});
+  document.querySelectorAll('input').forEach(el => originalStyles.inputs.push({el, bg: el.style.backgroundColor, color: el.style.color}));
+  document.querySelectorAll('div').forEach(el => originalStyles.divs.push({el, color: el.style.color}));
+  document.querySelectorAll('span').forEach(el => originalStyles.spans.push({el, color: el.style.color}));
+  document.querySelectorAll('a').forEach(el => originalStyles.a.push({el, color: el.style.color}));
+  document.querySelectorAll('h1, h2, h3, h4, h5, h6').forEach(el => originalStyles.headings.push({el, color: el.style.color}));
+  document.querySelectorAll('header').forEach(el => originalStyles.headers.push({el, color: el.style.backgroundColor}))
 
-document.querySelectorAll('div').forEach(el => {
-  el.style.background = 'none';
-  el.style.color = 'purple';
-});
+  window.__themeStatus = false;
 
-document.querySelectorAll('span').forEach(el => {
-  el.style.background = 'none';
-  el.style.color = 'purple';
-});
+  function Theme(isOn) {
+    const body = document.body;
 
-document.querySelectorAll('h1, h2, h3, h4, h5, h6').forEach(el => {
-  el.style.background = 'none';
-  el.style.color = 'blue';
-});
-document.background = 'fixed inset-0 bg-gradient-to-r from-green-400 to-blue-500 -z-10';
+    if (isOn) {
+      // Apply your custom theme
+      document.body.style.backgroundColor = 'black';
+      document.querySelectorAll('input').forEach(el => { el.style.backgroundColor = 'cyan'; el.style.color = 'black'; });
+      document.querySelectorAll('div').forEach(el => el.style.color = 'purple');
+      document.querySelectorAll('span').forEach(el => el.style.color = 'purple');
+      document.querySelectorAll('a').forEach(el => el.style.color = 'purple');
+      document.querySelectorAll('h1, h2, h3, h4, h5, h6').forEach(el => el.style.color = 'blue');
+      document.querySelectorAll('header').forEach(el => el.style.backgroundColor = 'blue');
+    } else {
+      // Restore original styles
+      body.className = originalStyles.bodyClass;
+      body.style.background = originalStyles.bodyBg;
+      body.style.backgroundColor = originalStyles.originalColor;
 
-// Add overlay gradient behind content
-const overlay = document.createElement('div');
-overlay.className = 'fixed inset-0 bg-gradient-to-r from-green-400 to-blue-500 -z-10';
-body.prepend(overlay);
+      originalStyles.inputs.forEach(obj => { obj.el.style.backgroundColor = obj.bg; obj.el.style.color = obj.color; });
+      originalStyles.divs.forEach(obj => obj.el.style.color = obj.color);
+      originalStyles.spans.forEach(obj => obj.el.style.color = obj.color);
+      originalStyles.a.forEach(obj => obj.el.style.color = obj.color);
+      originalStyles.headings.forEach(obj => obj.el.style.color = obj.color);
+      originalStyles.headers.forEach(obj => obj.el.style.backgroundColor = obj.color);
+    }
+  }
+
+  // Listen for messages from popup
+  chrome.runtime.onMessage.addListener(msg => {
+    if (msg.action === 'toggleTheme') {
+      window.__themeStatus = !window.__themeStatus;
+      Theme(window.__themeStatus);
+    }
+  });
+
+  // Apply default theme (OFF) initially
+  Theme(window.__themeStatus);
+}
+
+// --- POPUP BUTTON PART ---
+const toggleButton = document.getElementById('on_off');
+if (toggleButton) {
+  toggleButton.addEventListener('click', async () => {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    chrome.tabs.sendMessage(tab.id, { action: 'toggleTheme' });
+  });
+}
